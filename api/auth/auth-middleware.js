@@ -1,5 +1,5 @@
 // const db = require('../../data/db-config')
-const { findById } = require('../users/users-model')
+const { findBy } = require('../users/users-model')
 
 /*
   If the user does not have a session saved in the server
@@ -10,7 +10,7 @@ const { findById } = require('../users/users-model')
   }
 */
 function restricted(req, res, next) {
-  if (!req.sessions.user) {
+  if (!req.sessions.username) {
     res.status(401).json({ message: 'You shall not pass!' })
   }
   next()
@@ -24,9 +24,10 @@ function restricted(req, res, next) {
     "message": "Username taken"
   }
 */
-function checkUsernameFree(req, res, next) {
+async function checkUsernameFree(req, res, next) {
   const { username } = req.body
-  if (username) {
+  const [user] = await findBy({ username })
+  if (user) {
     res.status(422).json({ message: 'Username taken' })
   } else {
     next()
@@ -44,11 +45,12 @@ function checkUsernameFree(req, res, next) {
 async function checkUsernameExists(req, res, next) {
   const { username } = req.body
 
-  const user = await findById(username)
+  const [user] = await findBy({ username })
 
   if (!user) {
     res.status(401).json({ message: 'Invalid credentials' })
   } else {
+    req.body.user = user
     next()
   }
 }
