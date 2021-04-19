@@ -10,7 +10,7 @@ const { findBy } = require('../users/users-model')
   }
 */
 function restricted(req, res, next) {
-  if (!req.sessions.username) {
+  if (!req.session.user) {
     res.status(401).json({ message: 'You shall not pass!' })
   }
   next()
